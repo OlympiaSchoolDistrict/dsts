@@ -19,7 +19,7 @@ func TestDSTS(t *testing.T) {
 	}
 	defer done()
 
-	Tdsts := DatastoreTicketStore{ticketStoreID: "testingID", ctx: ctx}
+	Tdsts := DatastoreTicketStore{TicketStoreID: "testingID", ctx: ctx}
 	tim, _ := time.Parse(time.Kitchen, "5:20AM")
 
 	ticket := &cas.AuthenticationResponse{User: "exampleUser", AuthenticationDate: tim.Local(), Attributes: cas.UserAttributes{

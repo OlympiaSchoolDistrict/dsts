@@ -23,15 +23,19 @@ var (
 )
 
 type DatastoreTicketStore struct {
-	ticketStoreID string
+	TicketStoreID string
 	ctx           context.Context
 }
 
+func NewDataTicketStore(ctx context.Context) *DatastoreTicketStore {
+	return &DatastoreTicketStore{ctx: ctx}
+}
+
 func (s *DatastoreTicketStore) key() *datastore.Key {
-	if s.ticketStoreID == "" {
-		s.ticketStoreID = ticketStoreDefaultID
+	if s.TicketStoreID == "" {
+		s.TicketStoreID = ticketStoreDefaultID
 	}
-	return datastore.NewKey(s.ctx, ticketStoreGAEDSType, s.ticketStoreID, 0, nil)
+	return datastore.NewKey(s.ctx, ticketStoreGAEDSType, s.TicketStoreID, 0, nil)
 }
 
 func (s *DatastoreTicketStore) Read(id string) (*cas.AuthenticationResponse, error) {
