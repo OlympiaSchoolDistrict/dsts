@@ -18,7 +18,7 @@ type DSAuthenticationResponse struct {
 }
 
 var (
-	ticketStoreGAEDSType = "dsTicketStore"
+	ticketStoreGAEDSType = "TicketStore"
 	ticketStoreDefaultID = "defaultTicketStore"
 )
 
