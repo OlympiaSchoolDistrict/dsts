@@ -15,11 +15,15 @@ type DSAuthenticationResponse struct {
 	IsNewLogin          bool      // Whether new authentication was used to grant the service ticket
 	IsRememberedLogin   bool      // Whether a long term token was used to grant the service ticket
 	MemberOf            []string  // List of groups which the user is a member of
+	// cas.AuthenticationResponse
+	RecvdDate time.Time //Time this response was recieved
 }
 
 var (
-	ticketStoreGAEDSType = "TicketStore"
+	ticketStoreGAEDSType = "TicketStore2"
 	ticketStoreDefaultID = "defaultTicketStore"
+	authResponseKind     = "AuthResponse2"
+	authResponseAttrKind = "AuthResponseAttr2"
 )
 
 type DatastoreTicketStore struct {
@@ -39,15 +43,25 @@ func (s *DatastoreTicketStore) key() *datastore.Key {
 }
 
 func (s *DatastoreTicketStore) Read(id string) (*cas.AuthenticationResponse, error) {
-	var resp cas.AuthenticationResponse
-	k := datastore.NewKey(s.ctx, "AuthResponse", id, 0, s.key())
-	err := datastore.Get(s.ctx, k, &resp)
+	// var resp cas.AuthenticationResponse
+	var rresp DSAuthenticationResponse
+	k := datastore.NewKey(s.ctx, authResponseKind, id, 0, s.key())
+	err := datastore.Get(s.ctx, k, &rresp)
 	if err != nil {
 		return nil, err
 	}
+	resp := cas.AuthenticationResponse{
+		User:                rresp.User,
+		ProxyGrantingTicket: rresp.ProxyGrantingTicket,
+		Proxies:             rresp.Proxies,
+		AuthenticationDate:  rresp.AuthenticationDate,
+		IsNewLogin:          rresp.IsNewLogin,
+		IsRememberedLogin:   rresp.IsRememberedLogin,
+		MemberOf:            rresp.MemberOf,
+	}
 
 	var pl datastore.PropertyList
-	pk := datastore.NewKey(s.ctx, "AuthResponseAttr", "Attributes", 0, k)
+	pk := datastore.NewKey(s.ctx, authResponseAttrKind, "Attributes", 0, k)
 	err = datastore.Get(s.ctx, pk, &pl)
 
 	ua := map[string][]string{}
@@ -74,23 +88,24 @@ func (s *DatastoreTicketStore) Write(id string, t *cas.AuthenticationResponse) e
 		IsNewLogin:          t.IsNewLogin,
 		IsRememberedLogin:   t.IsRememberedLogin,
 		MemberOf:            t.MemberOf,
+		RecvdDate:           time.Now(),
 	}
 
-	k := datastore.NewKey(s.ctx, "AuthResponse", id, 0, s.key())
+	k := datastore.NewKey(s.ctx, authResponseKind, id, 0, s.key())
 	_, err := datastore.Put(s.ctx, k, &ticket)
 
 	if err != nil {
 		return err
 	}
 
-	a := datastore.NewKey(s.ctx, "AuthResponseAttr", "Attributes", 0, k)
+	a := datastore.NewKey(s.ctx, authResponseAttrKind, "Attributes", 0, k)
 	_, err = datastore.Put(s.ctx, a, &pl)
 	return err
 }
 
 func (s *DatastoreTicketStore) Delete(id string) error {
-	k := datastore.NewKey(s.ctx, "AuthResponse", id, 0, s.key())
-	a := datastore.NewKey(s.ctx, "AuthResponseAttr", "Attributes", 0, k)
+	k := datastore.NewKey(s.ctx, authResponseKind, id, 0, s.key())
+	a := datastore.NewKey(s.ctx, authResponseAttrKind, "Attributes", 0, k)
 
 	err := datastore.Delete(s.ctx, a)
 	if err != nil {
