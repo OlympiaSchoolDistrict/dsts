@@ -9,11 +9,11 @@ import (
 
 type DSAuthenticationResponse struct {
 	User                string    // Users login name
-	ProxyGrantingTicket string    // Proxy Granting Ticket
-	Proxies             []string  // List of proxies
-	AuthenticationDate  time.Time // Time at which authentication was performed
-	IsNewLogin          bool      // Whether new authentication was used to grant the service ticket
-	IsRememberedLogin   bool      // Whether a long term token was used to grant the service ticket
+	ProxyGrantingTicket string    `datastore:",noindex"` // Proxy Granting Ticket
+	Proxies             []string  `datastore:",noindex"` // List of proxies
+	AuthenticationDate  time.Time `datastore:",noindex"` // Time at which authentication was performed
+	IsNewLogin          bool      `datastore:",noindex"` // Whether new authentication was used to grant the service ticket
+	IsRememberedLogin   bool      `datastore:",noindex"` // Whether a long term token was used to grant the service ticket
 	MemberOf            []string  // List of groups which the user is a member of
 	// cas.AuthenticationResponse
 	RecvdDate time.Time //Time this response was recieved
